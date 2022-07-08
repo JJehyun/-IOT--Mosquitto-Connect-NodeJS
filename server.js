@@ -10,11 +10,11 @@ const client = mqtt.connect('mqtt://127.0.0.1:1883');
     console.log('listening on 8080');
     setInterval(
       ()=>{
-        client.publish('MY_TOPIC','hello mqtt');
+        client.publish('Pico-Home/req/AC67B25CC7F2','hello mqtt');
     },2000
   )
 
-  client.subscribe('MY_TOPIC');
+  client.subscribe('Pico-Home/req/AC67B25CC7F2');
   client.on('message',function(topic,message){
     console.log(`토픽:${topic.toString()}, 메세지:${message.toString()}`)
   })
