@@ -5,20 +5,128 @@ const app = express();
 const mailer = require('./mail');
 const mqtt = require('mqtt');
 const client = mqtt.connect('mqtt://127.0.0.1:1883');
+const { SerialPort } = require('serialport');
 
-   app.listen(8080,function(){
+
+app.listen(8080,function(){
     console.log('listening on 8080');
-    setInterval(
-      ()=>{
-        client.publish('Pico-Home/req/AC67B25CC7F2','hello mqtt');
-    },2000
-  )
 
-  client.subscribe('Pico-Home/req/AC67B25CC7F2');
-  client.on('message',function(topic,message){
-    console.log(`토픽:${topic.toString()}, 메세지:${message.toString()}`)
-  })
+const comPort1 = new SerialPort({
+path: 'COM3', baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none',autoOpen: false
+});
+comPort1.on("open", function () { 
+  console.log('open'); 
+  comPort1.on('data', function(data) { 
+    console.log(data); 
+  }); 
+});
+
+
+
+
+// comPort1.open(function (err) {
+//   if (err) {
+//     return console.log('Error opening port: ', err.message)
+//   }
+
+//   // Because there's no callback to write, write errors will be emitted on the port:
+//   comPort1.write(String.fromCharCode(12));
+//   comPort1.write("\r\n");
+//   console.log(String.fromCharCode(12))
+// })
   });
+
+
+    //   setInterval(
+  //     ()=>{
+  //       client.publish('Pico-Home/req/AC67B25CC7F2','hello mqtt');
+  //   },2000
+  // )
+
+  // client.subscribe('Pico-Home/req/AC67B25CC7F2');
+  // client.on('message',function(topic,message){
+  //   console.log(`토픽:${topic.toString()}, 메세지:${message.toString()}`)
+  // })
+
+
+
+//Serial 함수
+app.get('/Serial', (req, res) => {
+  const comPort1 = new SerialPort({
+    path: 'COM3', baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none',autoOpen: false
+    },function(err){
+        if(err){
+          return console.log('Error1: ',err.message);
+        }
+    });
+
+
+
+  // 포트 맞게 연결 되었는지 확인
+  // comPort1.on("error", function (err) { 
+  //   console.log('open'); 
+  //   if(err){
+  //     console.log(err.message);
+  //   }
+  // });
+  //포트의 정보 받기
+  // comPort1.on('data', function(data) { 
+  //   console.log(data); 
+  // }); 
+  const tess = Buffer.from(`${req.query.message}`,'ascii');
+  console.log(tess);
+  //시리얼에 정보 보내기
+
+  comPort1.open(function (err) {
+    console.log(comPort1.isOpen , "open");
+    if (err) {
+      return console.log('Error opening port: ', err.message)
+    }
+  // Because there's no callback to write, write errors will be emitted on the port:
+  comPort1.write(tess);
+  comPort1.write(tess, function(err) {
+    console.log(comPort1.isOpen , "write");
+    if (err) {
+      return console.log('Error on write: ', err.message)
+    }
+    console.log('message written')
+    comPort1.drain(function(err) { 
+      console.log(comPort1.isOpen , "drain");
+      if(err){
+      console.log(err);}
+      comPort1.on('data',(data)=>{console.log(data)})
+      comPort1.close( function(err){
+        if (err) {
+         return console.log('Error opening port3: ', err.message)
+       }
+       console.log("Close")
+       console.log(comPort1.isOpen , "close");
+       res.status(200).send(true);
+        })
+      });  
+    })
+  })
+})
+
+
+// comPort1.close(function(err){
+//   if (err) {
+//     return console.log('Error opening port3: ', err.message)
+//   }
+//   res.status(200).send(true);
+//   console.log("Close")
+// })
+//Control 함수
+app.get('/control', (req, res) => {
+      client.publish(`Pico-Home/req/${req.query.note}`,`${req.query.message}`);
+      res.status(200).send(true);
+client.subscribe(`Pico-Home/req/${req.query.note}`);
+client.on('message',function(topic,message){
+  console.log(`토픽:${topic.toString()}, 메세지:${message.toString()}`)
+})
+  });
+
+
 
 
 //아이디 회원가입 함수
@@ -128,5 +236,3 @@ app.get('/mail' , (req,res) =>{
     }
   })
 })
-
-

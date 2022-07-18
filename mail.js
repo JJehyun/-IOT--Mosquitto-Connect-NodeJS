@@ -22,7 +22,6 @@ const mailSender = {
       subject: param.subject, // 메일 제목
       text: param.text // 메일 내용
     };
-    
     // 메일 발송    
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
@@ -31,7 +30,6 @@ const mailSender = {
         console.log('Email sent: ' + info.response);
       }
     });
-
   }
 }
 
