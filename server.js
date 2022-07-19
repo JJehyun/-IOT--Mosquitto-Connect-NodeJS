@@ -62,6 +62,12 @@ app.get('/Serial', (req, res) => {
 
 
 
+
+
+
+
+
+    
   // 포트 맞게 연결 되었는지 확인
   // comPort1.on("error", function (err) { 
   //   console.log('open'); 
@@ -236,3 +242,14 @@ app.get('/mail' , (req,res) =>{
     }
   })
 })
+
+
+
+//장비 모든 리스트 가져오기
+  app.get('/list', (req, res) => {
+    const sql = "SELECT * FROM Iot"
+    db.query(sql , (error,results,fields) =>{
+      console.log(results)
+      res.status(200).send(results);
+      })
+    });
