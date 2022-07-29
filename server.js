@@ -35,14 +35,11 @@ comPort1.on("open", function () {
 //   console.log(String.fromCharCode(12))
 // })
   });
-
-
     //   setInterval(
   //     ()=>{
   //       client.publish('Pico-Home/req/AC67B25CC7F2','hello mqtt');
   //   },2000
   // )
-
   // client.subscribe('Pico-Home/req/AC67B25CC7F2');
   // client.on('message',function(topic,message){
   //   console.log(`토픽:${topic.toString()}, 메세지:${message.toString()}`)
@@ -249,6 +246,33 @@ app.get('/mail' , (req,res) =>{
   app.get('/list', (req, res) => {
     const sql = "SELECT * FROM Iot"
     db.query(sql , (error,results,fields) =>{
+      res.status(200).send(results);
+      })
+    });
+
+//장비 모든 리스트 가져오기
+  app.get('/masterpage', (req, res) => {
+    const sql = "SELECT page FROM master"
+    db.query(sql , (error,results,fields) =>{
+      console.log(results[0].page)
+      res.status(200).send(results);
+      })
+    });
+
+    //그룹 변경하기
+  app.get('/changegroup', (req, res) => {
+    const sql = 'UPDATE iot SET groupindex = ? WHERE id = ?'
+    db.query(sql ,[req.query.groupindex , req.query.id] ,  (error,results,fields) =>{
+      console.log(req.query.groupindex , req.query.id)
+      res.status(200).send(true);
+      })
+    });
+
+
+    //장비 모든 리스트 가져오기
+  app.get('/listkey', (req, res) => {
+    const sql = "SELECT * FROM iot where groupindex = ?"
+    db.query(sql ,[req.query.key] ,  (error,results,fields) =>{
       console.log(results)
       res.status(200).send(results);
       })
